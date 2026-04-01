@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TODO app</title>
+</head>
+
+<body>
+    <h1>TODO app updated</h1>
+    <form action="/add" method="POST">
+        <input type="text" name="task" placeholder="Add a new task">
+        <button type="submit">Add</button>
+    </form>
+    <ul>
+        {% for todo in todos %}
+        <li>{{ todo.task }}</li>
+        <form action="/edit/{{ todo.id }}" method="POST">
+            <input type="text" name="edit_task" placeholder="Edit task">
+            <button type="submit">Edit</button>
+        </form>
+        <form action="/delete/{{ todo.id }}" method="POST">
+            <button type="submit">Delete</button>
+        </form>
+        {% endfor %}
+    </ul>
+</body>
+
+</html>

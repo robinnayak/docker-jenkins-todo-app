@@ -1,0 +1,20 @@
+#BASE IMAGE
+FROM python:3.12-slim
+
+#SET WORKING DIRECTORY
+WORKDIR /app
+
+#COPY REQUIREMENTS FIRST (FOR CACHING)
+COPY requirements.txt .
+
+#INSTALL DEPENDENCIES
+RUN pip install --no-cache-dir -r requirements.txt
+
+#COPY APPLICATION CODE
+COPY . .
+
+#EXPOSE PORT
+EXPOSE 5000
+
+#RUN THE APPLICATION
+CMD ["python", "app.py"]
