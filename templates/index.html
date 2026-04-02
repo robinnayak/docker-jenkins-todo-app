@@ -5,26 +5,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TODO app</title>
+    <!-- Link to our vanilla CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
-    <h1>TODO app updated!! Connected CI/CD pipeline</h1>
-    <form action="/add" method="POST">
-        <input type="text" name="task" placeholder="Add a new task">
-        <button type="submit">Add</button>
-    </form>
-    <ul>
-        {% for todo in todos %}
-        <li>{{ todo.task }}</li>
-        <form action="/edit/{{ todo.id }}" method="POST">
-            <input type="text" name="edit_task" placeholder="Edit task">
-            <button type="submit">Edit</button>
-        </form>
-        <form action="/delete/{{ todo.id }}" method="POST">
-            <button type="submit">Delete</button>
-        </form>
-        {% endfor %}
-    </ul>
+    <div class="app-container">
+        <!-- Header section -->
+        <header class="app-header">
+            <div class="header-titles">
+                <h1>Todo App</h1>
+                <p class="subtitle">Connected CI/CD pipeline</p>
+            </div>
+            <!-- Task counter badge -->
+            <div class="task-counter">
+                <span class="count">{{ todos|length }}</span> tasks
+            </div>
+        </header>
+
+        <!-- Add Task Form -->
+        <section class="add-task-section">
+            <form action="/add" method="POST" class="add-task-form">
+                <input type="text" name="task" placeholder="What needs to be done?" required autocomplete="off">
+                <button type="submit" class="btn btn-primary">
+                    <!-- Inline SVG icon for Add button -->
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Add
+                </button>
+            </form>
+        </section>
+
+        <!-- Task List Section -->
+        <section class="task-list-section">
+            <!-- Empty state when no tasks are present -->
+            {% if todos|length == 0 %}
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" width="48" height="48" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="empty-icon"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                <p>All caught up! Add a new task above.</p>
+            </div>
+            {% else %}
+            <!-- List of tasks -->
+            <ul class="task-list">
+                {% for todo in todos %}
+                <li class="task-item">
+                    <!-- Display mode (Visible by default) -->
+                    <div class="task-content" id="display-{{ todo.id }}">
+                        <span class="task-text">{{ todo.task }}</span>
+                        <div class="task-actions">
+                            <!-- Edit button toggles the edit form via JavaScript -->
+                            <button type="button" class="btn btn-icon btn-edit" onclick="toggleEditMode('{{ todo.id }}')" title="Edit">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="16 3 21 8 8 21 3 21 3 16 16 3"></polygon></svg>
+                            </button>
+                            <!-- Delete form -->
+                            <form action="/delete/{{ todo.id }}" method="POST" class="inline-form">
+                                <button type="submit" class="btn btn-icon btn-delete" title="Delete">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Edit mode (Hidden by default) -->
+                    <div class="task-edit-mode hidden" id="edit-form-{{ todo.id }}">
+                        <!-- Form submits back to the original edit route -->
+                        <form action="/edit/{{ todo.id }}" method="POST" class="edit-task-form">
+                            <!-- Input is pre-filled with the current task text -->
+                            <input type="text" name="edit_task" value="{{ todo.task }}" required>
+                            <div class="edit-actions">
+                                <button type="button" class="btn btn-cancel" onclick="toggleEditMode('{{ todo.id }}')">Cancel</button>
+                                <button type="submit" class="btn btn-success">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </section>
+    </div>
+
+    <!-- Link to our vanilla JS file -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 
 </html>
