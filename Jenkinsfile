@@ -52,17 +52,40 @@ pipeline {
 
         stage('Deploy Application') {
             steps {
-                echo "🚀 Deploying container..."
+                echo "🚀 Deploying containers..."
 
                 sh '''
-                    # Stop old container if exists
+                    # Create a custom Docker network
+                    docker network create todo-network || true
+
+                    # Stop & remove old database container if exists
+                    docker stop todo-db || true
+                    docker rm todo-db || true
+
+                    # Stop & remove old app container if exists
                     docker stop $CONTAINER_NAME || true
                     docker rm $CONTAINER_NAME || true
 
-                    # Run new container
+                    # Run the PostgreSQL database container
+                    docker run -d \
+                        --name todo-db \
+                        --network todo-network \
+                        --restart always \
+                        -e POSTGRES_USER=postgres \
+                        -e POSTGRES_PASSWORD=admin \
+                        -e POSTGRES_DB=todo_db \
+                        -v todo-db-data:/var/lib/postgresql/data \
+                        postgres:15
+
+                    # Pause briefly to allow Postgres to initialize
+                    sleep 5
+
+                    # Run the new application container connected to Postgres
                     docker run -d \
                         -p $PORT:$PORT \
                         --name $CONTAINER_NAME \
+                        --network todo-network \
+                        -e DATABASE_URL="postgresql://postgres:admin@todo-db:5432/todo_db" \
                         $IMAGE_NAME:$IMAGE_TAG
                 '''
             }
