@@ -1,15 +1,32 @@
-version: '3'
+version: '3.8'
 
 services:
-  todo-app:
+  web:
     build: .
-    image: todo-app:v1
     container_name: todo-app-container-v1
     ports:
       - "5000:5000"
+    depends_on:
+      - db
     volumes:
       - .:/app
+    environment:
+      - FLASK_ENV=development
+    env_file:
+      - .env
 
+  db:
+    image: postgres:15
+    container_name: todo-db-container-v1
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
-
-    
+volumes:
+  postgres_data:
